@@ -21,6 +21,18 @@ const HomePage = () => {
         document.getElementById('root').style.margin = '0';
         document.getElementById('root').style.padding = '0';
 
+        // Add truncate-2-lines CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            .truncate-2-lines {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+        `;
+        document.head.appendChild(style);
+
         return () => {
             document.body.style.margin = '';
             document.body.style.padding = '';
@@ -33,6 +45,7 @@ const HomePage = () => {
                 document.getElementById('root').style.margin = '';
                 document.getElementById('root').style.padding = '';
             }
+            document.head.removeChild(style);
         };
     }, []);
 
@@ -197,13 +210,17 @@ const HomePage = () => {
                         currentItems.map((q) => (
                             <div
                                 key={q.id}
-                                className="bg-white rounded-xl shadow-md p-6 relative hover:bg-[#FFF1DC] hover:shadow-lg transition cursor-pointer"
-                                onClick={() => setSelectedPost(q)}
+                                className="bg-white rounded-xl shadow-md p-6 py-10 relative hover:bg-[#FFF1DC] hover:shadow-lg transition min-h-[200px]"
+                                onClick={(e) => {
+                                    if (!e.target.closest('.menu-button')) {
+                                        setSelectedPost(q);
+                                    }
+                                }}
                             >
                                 {/* แสดงปุ่มสามจุดเฉพาะ post ของ user ที่ login */}
                                 {currentUserId && q.userId === currentUserId && (
                                     <div
-                                        className="absolute top-4 right-4 text-xl text-gray-400 cursor-pointer"
+                                        className="absolute top-4 right-4 text-xl text-gray-500 cursor-pointer menu-button"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setOpenMenuId(openMenuId === q.id ? null : q.id);
@@ -214,36 +231,38 @@ const HomePage = () => {
                                 )}
 
                                 {openMenuId === q.id && (
-                                    <div className="absolute top-[36px] right-4 bg-[#FFAD00] text-white rounded-md shadow-md w-28 z-10 text-sm">
-                                        <div
-                                            className="px-4 py-2 hover:bg-white hover:text-[#FFAD00] cursor-pointer transition rounded-md"
+                                    <div className="absolute top-10 right-1 bg-[#FAB12F] text-white rounded-md shadow-md flex flex-col items-center text-sm z-10 overflow-hidden">
+                                        <button
+                                            className="px-4 py-2 w-full text-center hover:bg-white hover:text-[#FA812F] transition"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleEdit(q);
                                             }}
                                         >
                                             Edit
-                                        </div>
-                                        <div
-                                            className="px-4 py-2 hover:bg-white hover:text-[#FFAD00] cursor-pointer transition rounded-md"
+                                        </button>
+                                        <button
+                                            className="px-4 py-2 w-full text-center hover:bg-white hover:text-[#FA812F] transition"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleDelete(q);
                                             }}
                                         >
                                             Delete
-                                        </div>
+                                        </button>
                                     </div>
                                 )}
 
-                                <div className="text-sm text-gray-600 flex items-center gap-2 mb-2">
-                                    <span>{q.author}</span>
+                                <div className="flex items-center gap-2 text-sm mb-2">
+                                    <span className="text-gray-600">{q.author}</span>
                                     <span className="bg-[#FA812F] text-white px-2 py-0.5 text-xs rounded">
                                         {q.subject}
                                     </span>
                                 </div>
-                                <h2 className="text-lg font-semibold">{q.title}</h2>
-                                <p className="text-sm text-gray-600">{q.description}</p>
+                                <h2 className="font-bold text-lg mb-1">{q.title}</h2>
+                                <p className="text-sm text-gray-700 truncate-2-lines">
+                                    {q.description}
+                                </p>
                             </div>
                         ))
                     )}
@@ -310,4 +329,4 @@ const HomePage = () => {
     );
 };
 
-export default HomePage;
+export default HomePage;    
