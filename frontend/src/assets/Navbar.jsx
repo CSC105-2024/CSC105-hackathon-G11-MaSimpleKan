@@ -17,7 +17,7 @@ function Navbar() {
     };
 
     return (
-        <header className="bg-[#FFFFFF] text-[#FFAD00] px-6 py-4 flex justify-between items-center">
+        <header className="bg-[#FFFFFF] text-[#FFAD00] px-6 py-4 flex items-center justify-between">
             <div className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
                 <img
                     src="../../public/BookLogo.png"
@@ -27,7 +27,7 @@ function Navbar() {
                 Ma Simple Kan
             </div>
             {isLoggedIn && (
-                <nav className="hidden md:flex gap-8 text-lg font-medium">
+                <nav className="hidden md:flex gap-8 text-lg font-medium justify-center flex-1">
                     <Link to="/home" className="hover:underline">
                         Home
                     </Link>
@@ -48,7 +48,7 @@ function Navbar() {
                         </button>
                     </div>
                 )}
-                <div>
+                <div className="flex items-center justify-end min-w-[120px]">
                     {isLoggedIn ? (
                         <button
                             onClick={handleLogout}
@@ -57,7 +57,7 @@ function Navbar() {
                             <Link to="/">Logout</Link>
                         </button>
                     ) : (
-                        <button className="bg-[#FFAD00] text-white text-sm sm:text-base font-medium px-4 py-2 rounded-md hover:bg-[#7295b8] transition">
+                        <button className="bg-[#FFAD00] text-white text-sm sm:text-base font-medium px-4 py-2 rounded-md hover:bg-orange-500 transition">
                             <Link to="/signup">Sign Up</Link>
                         </button>
                     )}
