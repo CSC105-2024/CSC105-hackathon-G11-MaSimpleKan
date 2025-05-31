@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, {useState} from "react";
+import {useForm} from "react-hook-form";
+import {z} from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
+// import { createPost } from "../api/createPost";
 
-const subjectEnum = ["Computer", "Math", "Biology", "Physics", "Chemistry"];
+const subjectEnum = ["Math", "Biology", "Physics", "Chemistry", "Computer"];
 
 const postSchema = z.object({
     title: z.string().min(1, "Title is required"),
@@ -11,23 +12,32 @@ const postSchema = z.object({
     description: z.string().min(1, "Description is required"),
 });
 
-const CreatePostPopup = ({ onClose }) => {
+const CreatePostPopup = ({onClose, onCreate}) => {
     const [success, setSuccess] = useState(false);
 
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
         reset,
     } = useForm({
         resolver: zodResolver(postSchema),
     });
 
-    const onSubmit = (data) => {
-        console.log("✅ Submitted post:", data);
-        setSuccess(true);
+    const onSubmit = async (data) => {
+        const post = {
+            ...data,
+            userId: Number(localStorage.getItem("userId")),
+        };
+        console.log("📦 POST data:", post);
+
+        onCreate(post);
         reset();
-        setTimeout(() => setSuccess(false), 3000);
+        setSuccess(true);
+        setTimeout(() => {
+            setSuccess(false);
+            onClose();
+        }, 3000);
     };
 
     return (
@@ -105,7 +115,8 @@ const CreatePostPopup = ({ onClose }) => {
                 </form>
 
                 {success && (
-                    <div className="mt-6 text-center bg-white text-green-600 border border-green-400 px-4 py-2 rounded-md shadow">
+                    <div
+                        className="mt-6 text-center bg-white text-green-600 border border-green-400 px-4 py-2 rounded-md shadow">
                         ✅ Create success!
                     </div>
                 )}

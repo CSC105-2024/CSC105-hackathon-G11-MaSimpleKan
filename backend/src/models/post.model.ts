@@ -7,12 +7,13 @@ export const createPost = async (
   subject: $Enums.Subject,
   userId: number
 ) => {
+  console.log("📥 Received:", { title, description, subject, userId });
   const postForm = db.post.create({
     data: {
       title,
       description,
       subject,
-      userId,
+      userId: Number(userId),
     },
   });
   return postForm;
