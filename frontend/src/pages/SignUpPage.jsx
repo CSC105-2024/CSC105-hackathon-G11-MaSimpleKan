@@ -10,8 +10,8 @@ import { createAccount } from "../api/createAccount";
 const signUpSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "lastName is required"),
+    fName: z.string().min(1, "First name is required"),
+    sName: z.string().min(1, "sName is required"),
     tel: z.string().regex(/^[0-9]{9,15}$/, "Phone number must be 10 digit from 0-9"),
 });
 
@@ -96,23 +96,23 @@ const SignUpPage = () => {
                     <div>
                         <label className="text-sm font-semibold">First Name</label>
                         <input
-                            {...register("firstName")}
+                            {...register("fName")}
                             type="text"
                             placeholder="Mitsuki"
                             className="w-full mt-1 px-4 py-2 rounded-md border border-gray-300 text-[#FFAD00] bg-white shadow focus:outline-none focus:ring-2 focus:ring-orange-400"
                         />
-                        {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>}
+                        {errors.fName && <p className="text-red-500 text-sm mt-1">{errors.fName.message}</p>}
                     </div>
 
                     <div>
                         <label className="text-sm font-semibold">Surname</label>
                         <input
-                            {...register("lastName")}
+                            {...register("sName")}
                             type="text"
                             placeholder="Tanaiwa"
                             className="w-full mt-1 px-4 py-2 rounded-md border border-gray-300 text-[#FFAD00] bg-white shadow focus:outline-none focus:ring-2 focus:ring-orange-400"
                         />
-                        {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>}
+                        {errors.sName && <p className="text-red-500 text-sm mt-1">{errors.sName.message}</p>}
                     </div>
 
                     <div>
