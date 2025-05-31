@@ -3,6 +3,8 @@ import Navbar from "../assets/Navbar.jsx";
 import EditPopup from "../popup/EditPopup";
 import DeletePopup from "../popup/DeletePopup";
 import "../index.css";
+import CreatePostPopup from "../popup/CreatePostPopup.jsx";
+import PostInformationPopup from "../popup/PostInformation.jsx";
 
 function Profile() {
     const subjectEnum = ["Math", "Biology", "Physics", "Chemistry", "Computer"];
@@ -77,6 +79,8 @@ function Profile() {
     const [showEdit, setShowEdit] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [showCreatePopup, setShowCreatePopup] = useState(false);
+    const [selectedPost, setSelectedPost] = useState(null);
     const [indexToDelete, setIndexToDelete] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false);
     const [selectedSubject, setSelectedSubject] = useState(null);
@@ -170,9 +174,14 @@ function Profile() {
                             key={post.id}
                             ref={(el) => (cardRefs.current[i] = el)}
                             className="bg-white rounded-xl shadow-md p-6 py-10 relative hover:bg-[#FFF1DC] hover:shadow-lg transition min-h-[200px]"
+                            onClick={(e) => {
+                                if (!e.target.closest('.menu-button')) {
+                                    setSelectedPost(post);
+                                }
+                            }}
                         >
                             <div
-                                className="absolute top-4 right-4 text-xl text-gray-500 cursor-pointer"
+                                className="absolute top-4 right-4 text-xl text-gray-500 cursor-pointer menu-button"
                                 onClick={() => setOpenMenuIndex(openMenuIndex === i ? null : i)}
                             >
                                 ⋯
@@ -206,8 +215,8 @@ function Profile() {
                             <div className="flex items-center gap-2 text-sm mb-2">
                                 <span className="text-gray-600">{post.author}</span>
                                 <span className="bg-[#FA812F] text-white px-2 py-0.5 text-xs rounded">
-                  {post.subject}
-                </span>
+                                    {post.subject}
+                                </span>
                             </div>
                             <h2 className="font-bold text-lg mb-1">{post.title}</h2>
                             <p className="text-sm text-gray-700 truncate-2-lines">
@@ -238,6 +247,16 @@ function Profile() {
                         </button>
                     )}
                 </div>
+                {showCreatePopup && (
+                    <CreatePostPopup onClose={() => setShowCreatePopup(false)} />
+                )}
+
+                {selectedPost && (
+                    <PostInformationPopup
+                        post={selectedPost}
+                        onClose={() => setSelectedPost(null)}
+                    />
+                )}
 
                 <EditPopup
                     trigger={showEdit}
