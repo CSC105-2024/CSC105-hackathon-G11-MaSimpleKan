@@ -46,7 +46,7 @@ function EditPopup({ trigger, item, onCancel, onSave }) {
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none"
+                            className="w-full px-4 py-2 rounded-md border bg-white border-gray-300 focus:outline-none"
                         />
                     </div>
 
@@ -88,7 +88,7 @@ function EditPopup({ trigger, item, onCancel, onSave }) {
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none"
+                        className="w-full px-4 py-2 rounded-md border bg-white border-gray-300 focus:outline-none"
                         rows={4}
                     />
                 </div>
