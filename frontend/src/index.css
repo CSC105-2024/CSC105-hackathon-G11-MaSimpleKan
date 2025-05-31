@@ -12,4 +12,10 @@
     --text-header-weight: bold;
     --font-sans: 'Poppins', sans-serif;
     --font-sue: 'Sue Ellen Francisco', cursive;
-}
+}.truncate-2-lines {
+     display: -webkit-box;
+     -webkit-line-clamp: 2;
+     -webkit-box-orient: vertical;
+     overflow: hidden;
+     text-overflow: ellipsis;
+ }
