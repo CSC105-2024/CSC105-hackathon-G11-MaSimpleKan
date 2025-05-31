@@ -45,6 +45,7 @@ function Profile() {
     const [showConfirm, setShowConfirm] = useState(false);
     const [indexToDelete, setIndexToDelete] = useState(null);
 
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -147,7 +148,6 @@ function Profile() {
                     item={selectedItem}
                     onCancel={() => setShowEdit(false)}
                     onSave={(updatedItem) => {
-                        // update logic here
                         setShowEdit(false);
                     }}
                 />
@@ -156,7 +156,6 @@ function Profile() {
                     trigger={showConfirm}
                     onCancel={() => setShowConfirm(false)}
                     onConfirm={() => {
-                        // delete logic here
                         setShowConfirm(false);
                     }}
                 />

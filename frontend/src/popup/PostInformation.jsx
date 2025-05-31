@@ -23,17 +23,25 @@ const PostInformationPopup = ({ post, onClose }) => {
     const [success, setSuccess] = useState(false);
     const [clickedCorrects, setClickedCorrects] = useState(Array(mockAnswers.length).fill(false));
     const [clickedSimples, setClickedSimples] = useState(Array(mockAnswers.length).fill(false));
+    const [correctCounts, setCorrectCounts] = useState(Array(mockAnswers.length).fill(0));
+    const [simpleCounts, setSimpleCounts] = useState(Array(mockAnswers.length).fill(0));
 
     const toggleCorrect = (index) => {
         const updated = [...clickedCorrects];
+        const updatedCounts = [...correctCounts];
         updated[index] = !updated[index];
+        updatedCounts[index] += updated[index] ? 1 : -1;
         setClickedCorrects(updated);
+        setCorrectCounts(updatedCounts);
     };
 
     const toggleSimple = (index) => {
         const updated = [...clickedSimples];
+        const updatedCounts = [...simpleCounts];
         updated[index] = !updated[index];
+        updatedCounts[index] += updated[index] ? 1 : -1;
         setClickedSimples(updated);
+        setSimpleCounts(updatedCounts);
     };
 
     const handleSubmit = () => {
