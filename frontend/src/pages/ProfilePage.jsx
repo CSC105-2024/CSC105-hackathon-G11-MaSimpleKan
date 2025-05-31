@@ -5,7 +5,7 @@ import DeletePopup from "../popup/DeletePopup";
 import "../index.css";
 
 function Profile() {
-    const posts = [
+    const [postsData, setPostsData] = useState([
         {
             id: 1,
             author: "Natalee Chua",
@@ -37,14 +37,54 @@ function Profile() {
             title: "What’s the difference between let and const?",
             description: "Still confused even after reading docs many times!",
         },
-    ];
+        {
+            id: 5,
+            author: "Natalee Chua",
+            subject: "Biology",
+            title: "What is DNA replication?",
+            description: "I want a simplified explanation, please!",
+        },
+        {
+            id: 6,
+            author: "Natalee Chua",
+            subject: "Physics",
+            title: "What is Newton's 3rd Law?",
+            description: "I always forget this one... help!",
+        },
+        {
+            id: 7,
+            author: "Natalee Chua",
+            subject: "Chemistry",
+            title: "What is an ionic bond?",
+            description: "Need examples that are easy to remember.",
+        },
+        {
+            id: 8,
+            author: "Natalee Chua",
+            subject: "Math",
+            title: "How do I factor equations?",
+            description: "Help me understand factoring with tricks.",
+        },
+        {
+            id: 9,
+            author: "Natalee Chua",
+            subject: "Computer",
+            title: "What's a closure in JS?",
+            description: "I hear about closures but don’t know what they are.",
+        },
+    ]);
+
+    const subjectEnum = ["Math", "Biology", "Physics", "Chemistry", "Computer"];
     const [openMenuIndex, setOpenMenuIndex] = useState(null);
     const cardRefs = useRef([]);
     const [showEdit, setShowEdit] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const [indexToDelete, setIndexToDelete] = useState(null);
-
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [selectedSubject, setSelectedSubject] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const postsPerPage = 8;
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -63,8 +103,17 @@ function Profile() {
         };
     }, [openMenuIndex]);
 
-    return (
+    const filteredPosts = selectedSubject
+        ? postsData.filter((post) => post.subject === selectedSubject)
+        : postsData;
 
+    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+    const currentPosts = filteredPosts.slice(
+        (currentPage - 1) * postsPerPage,
+        currentPage * postsPerPage
+    );
+
+    return (
         <div className="min-h-screen bg-[#F5F5F5]">
             <Navbar />
             <div className="max-w-6xl mx-auto px-6 py-10">
@@ -74,15 +123,43 @@ function Profile() {
                         placeholder="let’s drop the complex question"
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none"
                     />
-                    <select className="bg-[#FAB12F] text-white px-4 py-2 rounded-md">
-                        <option>Subject</option>
-                        <option>Math</option>
-                        <option>Computer</option>
-                    </select>
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowDropdown((prev) => !prev)}
+                            className="bg-[#FFAD00] text-white px-4 py-2 rounded-md hover:bg-orange-500 transition whitespace-nowrap"
+                        >
+                            {selectedSubject || "Subject"} {showDropdown ? "▲" : "▼"}
+                        </button>
+                        {showDropdown && (
+                            <div className="absolute right-0 mt-1 bg-[#FFAD00] text-white rounded-md shadow-md min-w-[120px] z-10">
+                                <div
+                                    className="px-4 py-2 hover:bg-white hover:text-[#FFAD00] cursor-pointer transition rounded-md"
+                                    onClick={() => {
+                                        setSelectedSubject(null);
+                                        setShowDropdown(false);
+                                    }}
+                                >
+                                    All
+                                </div>
+                                {subjectEnum.map((subject) => (
+                                    <div
+                                        key={subject}
+                                        className="px-4 py-2 hover:bg-white hover:text-[#FFAD00] cursor-pointer transition rounded-md"
+                                        onClick={() => {
+                                            setSelectedSubject(subject);
+                                            setShowDropdown(false);
+                                        }}
+                                    >
+                                        {subject}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {posts.map((post, i) => (
+                    {currentPosts.map((post, i) => (
                         <div
                             key={post.id}
                             ref={(el) => (cardRefs.current[i] = el)}
@@ -136,11 +213,16 @@ function Profile() {
 
                 <div className="mt-10 flex justify-center items-center gap-3">
                     <button className="bg-[#FAB12F] text-white w-8 h-8 rounded-full font-semibold">
-                        1
+                        {currentPage}
                     </button>
-                    <button className="text-xl text-[#FA812F] hover:text-[#FA4032]">
-                        &gt;
-                    </button>
+                    {currentPage < totalPages && (
+                        <button
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            className="text-xl text-[#FA812F] hover:text-[#FA4032]"
+                        >
+                            &gt;
+                        </button>
+                    )}
                 </div>
 
                 <EditPopup
@@ -148,6 +230,11 @@ function Profile() {
                     item={selectedItem}
                     onCancel={() => setShowEdit(false)}
                     onSave={(updatedItem) => {
+                        setPostsData((prev) => {
+                            const newData = [...prev];
+                            newData[updatedItem.index] = updatedItem;
+                            return newData;
+                        });
                         setShowEdit(false);
                     }}
                 />
@@ -156,6 +243,11 @@ function Profile() {
                     trigger={showConfirm}
                     onCancel={() => setShowConfirm(false)}
                     onConfirm={() => {
+                        setPostsData((prev) => {
+                            const newData = [...prev];
+                            newData.splice(indexToDelete, 1);
+                            return newData;
+                        });
                         setShowConfirm(false);
                     }}
                 />
