@@ -1,10 +1,10 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import TabSwitcher from "../pages/TabSwitcher";
-import BookLogo from "../../public/BookLogo.png";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import TabSwitcher from "../pages/TabSwitcher";
+import BookLogo from "../../public/BookLogo.png";
 import { userLogin } from "../api/userLogin";
 
 const loginSchema = z.object({
@@ -29,14 +29,16 @@ const LoginPage = () => {
     });
 
     const onSubmit = async (data) => {
-        const res = await userLogin(data); // ← ต้อง import ฟังก์ชันนี้จริงจัง
+        const res = await userLogin(data);
         if (res.success) {
-            localStorage.setItem("isLoggedIn", "true");
-            localStorage.setItem("userId", res.data.data);
+            localStorage.setItem("token", res.data.token);
             setLoginSuccess(true);
-            setTimeout(() => navigate("/"), 1500);
+
+            setTimeout(() => {
+                navigate("/home");
+            }, 1500);
         } else {
-            alert("Error logging in. Try again!");
+            alert(res.msg);
         }
     };
 
@@ -71,13 +73,9 @@ const LoginPage = () => {
                             {...register("email")}
                             type="email"
                             placeholder="masimplekan@gmail.com"
-                            className="w-full mt-1 px-4 py-2 rounded-md border border-gray-300 text-[#FFAD00] bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            className="w-full mt-1 px-4 py-2 rounded-md border border-gray-300 text-[#FFAD00] bg-white"
                         />
-                        {errors.email && (
-                            <p className="text-[#FFAD00] text-sm mt-1">
-                                {errors.email.message}
-                            </p>
-                        )}
+                        {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
                     </div>
 
                     <div>
@@ -85,19 +83,15 @@ const LoginPage = () => {
                         <input
                             {...register("password")}
                             type="password"
-                            placeholder="***********"
-                            className="w-full mt-1 px-4 py-2 rounded-md border border-gray-300 text-[#FFAD00] bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            placeholder="********"
+                            className="w-full mt-1 px-4 py-2 rounded-md border border-gray-300 text-[#FFAD00] bg-white"
                         />
-                        {errors.password && (
-                            <p className="text-[#FFAD00] text-sm mt-1">
-                                {errors.password.message}
-                            </p>
-                        )}
+                        {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>}
                     </div>
 
                     <button
                         type="submit"
-                        className="w-full mt-4 bg-[#FFAD00] hover:bg-orange-600 transition text-white font-semibold py-3 rounded-md text-lg shadow-sm"
+                        className="w-full bg-[#FFAD00] hover:bg-orange-600 text-white font-semibold py-3 rounded-md text-lg"
                     >
                         Sign In
                     </button>
