@@ -166,8 +166,8 @@ export const loginUser = async (c: Context) => {
 
 export const getAllPostFromUser = async (c: Context) => {   
   try {
-    //const userId = c.get("userId");
-    const userId = c.req.query("userId");
+    const userId = c.get("userId");
+    // const userId = c.req.query("userId");
     if (userId) {
       const data = await postModel.getAllPostFromUser(parseInt(userId));
       return c.json(data, 200);
