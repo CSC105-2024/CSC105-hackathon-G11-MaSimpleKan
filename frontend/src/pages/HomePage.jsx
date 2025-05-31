@@ -36,7 +36,7 @@ const HomePage = () => {
     const [openMenuId, setOpenMenuId] = useState(null);
     const [showCreatePopup, setShowCreatePopup] = useState(false);
     const [selectedPost, setSelectedPost] = useState(null);
-    const [selectedSubject, setSelectedSubject] = useState(null); // ✅ filter state
+    const [selectedSubject, setSelectedSubject] = useState(null);
 
     const questions = selectedSubject
         ? allQuestions.filter((q) => q.subject === selectedSubject)
