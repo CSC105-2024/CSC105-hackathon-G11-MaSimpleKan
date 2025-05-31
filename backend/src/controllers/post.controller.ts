@@ -19,14 +19,14 @@ type editPostBody = {
 export const createPost = async (c: Context) => {
   try {
     // //Waiting for Integration
-    // const userId = c.get("userId");
-    // const formData = await c.req.parseBody();
-    // const body = JSON.parse(formData.json as string);
-    // console.log(body);
+    const userId = c.get("userId");
+    const formData = await c.req.parseBody();
+    const body = JSON.parse(formData.json as string);
+    console.log(body);
 
-    const body = await c.req.json<createPostBody>();
+    // const body = await c.req.json<createPostBody>();
 
-    if (!body.title || !body.description || !body.subject || !body.userId)
+    if (!body.title || !body.description || !body.subject )
       return c.json(
         {
           success: false,
@@ -37,18 +37,18 @@ export const createPost = async (c: Context) => {
       );
 
     //Integration
-    // if (!userId)
-    //   return c.json({
-    //     success: false,
-    //     msg: "userId is Undefinded",
-    //   });
+    if (!userId)
+      return c.json({
+        success: false,
+        msg: "userId is Undefinded",
+      });
 
     const newPost = await postModel.createPost(
       body.title,
       body.description,
       body.subject,
-      body.userId
-      //userId
+      //   body.userId
+      userId
     );
     return c.json({
       success: true,
@@ -70,12 +70,12 @@ export const createPost = async (c: Context) => {
 export const editPost = async (c: Context) => {
   try {
     // Integration
-    // const userId = c.get("userId");
-    // const formData = await c.req.parseBody();
-    // const body = JSON.parse(formData.json as string);
+    //const userId = c.get("userId");
+    const formData = await c.req.parseBody();
+    const body = JSON.parse(formData.json as string);
 
     const id = c.req.query("id");
-    const body = await c.req.json<editPostBody>();
+    // const body = await c.req.json<editPostBody>();
 
     if (!body.title || !body.description || !body.subject)
       return c.json(

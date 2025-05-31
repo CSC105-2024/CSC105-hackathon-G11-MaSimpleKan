@@ -27,11 +27,11 @@ model User {
 }
 
 enum Subject {
-  math
-  biology
-  chemistry
-  physics
-  computer
+  Math
+  Biology
+  Chemistry
+  Physics
+  Computer
 }
 
 model Post {
@@ -50,8 +50,8 @@ model Post {
 model Comment {
   id           Int    @id @default(autoincrement())
   text         String
-  correctCount Int @default(0)
-  simpleCount  Int @default(0)
+  correctCount Int    @default(0)
+  simpleCount  Int    @default(0)
 
   userId Int
   User   User @relation(fields: [userId], references: [id])

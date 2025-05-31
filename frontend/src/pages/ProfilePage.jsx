@@ -7,6 +7,7 @@ import CreatePostPopup from "../popup/CreatePostPopup.jsx";
 import PostInformationPopup from "../popup/PostInformation.jsx";
 import { getAllPostFromUser } from "../api/getAllPostFromUser.js";
 import { getUserLoggedIn } from "../api/getUserLoggin.js";
+import { deletePost } from '../api/deletePost.js';
 
 function Profile() {
   const subjectEnum = ["Math", "Biology", "Physics", "Chemistry", "Computer"];
@@ -126,7 +127,9 @@ function Profile() {
               ref={(el) => (cardRefs.current[i] = el)}
               className="bg-white rounded-xl shadow-md p-6 py-10 relative hover:bg-[#FFF1DC] hover:shadow-lg transition min-h-[200px]"
               onClick={(e) => {
-                if (!e.target.closest(".menu-button")) {
+                const isMenuButton = e.target.closest(".menu-button");
+                const isMenuDropdown = e.target.closest(".menu-dropdown");
+                if (!isMenuButton && !isMenuDropdown) {
                   setSelectedPost(post);
                 }
               }}
@@ -139,7 +142,8 @@ function Profile() {
               </div>
 
               {openMenuIndex === i && (
-                <div className="absolute top-10 right-1 bg-[#FAB12F] text-white rounded-md shadow-md flex flex-col items-center text-sm z-10 overflow-hidden">
+                <div className="menu-dropdown absolute top-10 right-1 bg-[#FAB12F] text-white rounded-md shadow-md flex flex-col items-center text-sm z-10 overflow-hidden">
+                  {" "}
                   <button
                     className="px-4 py-2 w-full text-center hover:bg-white hover:text-[#FA812F] transition"
                     onClick={() => {
@@ -167,7 +171,9 @@ function Profile() {
               )}
 
               <div className="flex items-center gap-2 text-sm mb-2">
-                <span className="text-gray-600">{user.fName}  {user.sName}</span>
+                <span className="text-gray-600">
+                  {user?.fName} {user?.sName}
+                </span>
                 <span className="bg-[#FA812F] text-white px-2 py-0.5 text-xs rounded">
                   {post.subject}
                 </span>
@@ -229,11 +235,22 @@ function Profile() {
         <DeletePopup
           trigger={showConfirm}
           onCancel={() => setShowConfirm(false)}
-          onConfirm={() => {
+          onConfirm={async () => {
+            const itemToDelete = postsData[indexToDelete];
+            const id = itemToDelete.id;
+
             const updated = [...postsData];
             updated.splice(indexToDelete, 1);
             setPostsData(updated);
             setShowConfirm(false);
+
+            const res = await deletePost(id);
+
+            if (res.success) {
+              location.reload();
+            } else {
+              alert("Error deleting a post! Try Again!");
+            }
           }}
         />
       </div>

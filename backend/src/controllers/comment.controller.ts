@@ -11,11 +11,11 @@ type createCommentBody = {
 export const createComment = async (c: Context) => {
   try {
     // //Waiting for Integration
-    // const userId = c.get("userId");
-    // const formData = await c.req.parseBody();
-    // const body = JSON.parse(formData.json as string);
-    // console.log(body);
-    const body = await c.req.json<createCommentBody>();
+    const userId = c.get("userId");
+    const formData = await c.req.parseBody();
+    const body = JSON.parse(formData.json as string);
+    console.log(body);
+    // const body = await c.req.json<createCommentBody>();
 
     if (!body.text)
       return c.json(
@@ -27,17 +27,17 @@ export const createComment = async (c: Context) => {
         400
       );
     //Integration
-    // if (!userId)
-    //   return c.json({
-    //     success: false,
-    //     msg: "userId is Undefinded",
-    //   });
+    if (!userId)
+      return c.json({
+        success: false,
+        msg: "userId is Undefinded",
+      });
 
     const newComment = await commentModel.createComment(
       body.text,
-      body.userId,
-      body.postId
-      //userId
+    //   body.userId,
+      body.postId,
+      userId
     );
     return c.json({
       success: true,

@@ -39,12 +39,8 @@ export const editPost = async (
 };
 
 export const deletePost = async (id: number) => {
-  const postForm = db.post.delete({
-    where: {
-      id,
-    },
-  });
-  return postForm;
+  await db.comment.deleteMany({ where: { postId: id } });
+  return db.post.delete({ where: { id } });
 };
 
 export const getPost = async (id: number) => {
