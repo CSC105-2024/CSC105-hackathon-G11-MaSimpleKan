@@ -44,4 +44,13 @@ const getLoginUser = async (email: string, password: string) => {
     return user;
 };
 
-export {createUser,getUser,getAllUser,getLoginUser}
+const getUserLoggedIn = async (id: number) => {
+  const user = await db.user.findUnique({
+    where: {
+      id: id,
+    },
+  });
+  return user;
+};
+
+export {createUser,getUser,getAllUser,getLoginUser, getUserLoggedIn}

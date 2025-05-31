@@ -6,13 +6,13 @@ const userRouter = new Hono();
 
 userRouter.post("/create", userController.createUser);
 userRouter.post("/login", userController.loginUser);
-// userRouter.get("/get",  userController.getUser);
 userRouter.get("/getAll", userController.getAllUser);
-// userRouter.get("/posts",  userController.getAllPostFromUser);
 
 //Integration
 userRouter.get("/get", authMiddleware, userController.getUser);
 userRouter.get("/posts", authMiddleware, userController.getAllPostFromUser);
+userRouter.get("/getLoggedIn", authMiddleware, userController.getUserLoggedIn);
+
 
 
 export { userRouter };

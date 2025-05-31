@@ -191,3 +191,32 @@ export const getAllPostFromUser = async (c: Context) => {
     );
   }
 };
+
+export const getUserLoggedIn = async (c: Context) => {
+  
+  try {
+    const userId = c.get("userId");
+    //const userId = c.req.query("userId")
+    if (userId !== undefined && userId !== null) {
+      const data = await userModel.getUserLoggedIn(parseInt(userId));
+      return c.json(data, 200);
+    }
+    return c.json(
+      {
+        success: false,
+        data: null,
+        msg: "Missing required fields",
+      },
+      400
+    );
+  } catch (e) {
+    return c.json(
+      {
+        success: false,
+        data: null,
+        msg: `${e}`,
+      },
+      500
+    );
+  }
+};
