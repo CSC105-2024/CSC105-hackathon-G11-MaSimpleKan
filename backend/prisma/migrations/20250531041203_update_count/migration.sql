@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Comment` MODIFY `correctCount` INTEGER NOT NULL DEFAULT 0,
+    MODIFY `simpleCount` INTEGER NOT NULL DEFAULT 0;
