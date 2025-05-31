@@ -5,11 +5,14 @@ import PostInformationPopup from "./../popup/PostInformation";
 import EditPopup from "./../popup/EditPopup";
 import DeletePopup from "./../popup/DeletePopup";
 import { deletePost } from "../api/deletePost.js";
+import { getAllPost } from "../api/getAllPost.js";
+import { getUserLoggedIn } from "../api/getUserLoggin.js";
 
 const subjectEnum = ["Math", "Biology", "Physics", "Chemistry", "Computer"];
 
 const HomePage = () => {
   const [currentUserId, setCurrentUserId] = useState(1); // Mock current user ID
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     document.body.style.margin = "0";
@@ -50,6 +53,21 @@ const HomePage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const getPost = async () => {
+      const data = await getAllPost();
+      setPosts(() => data.data);
+    };
+    getPost();
+
+    const getUserData = async () => {
+      const res = await getUserLoggedIn();
+      setUser(() => res.data);
+      localStorage.setItem("userId", res.data.data);
+    };
+    getUserData();
+  }, []);
+
   const [posts, setPosts] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -62,95 +80,6 @@ const HomePage = () => {
   const [editingPost, setEditingPost] = useState(null);
   const [deletingPost, setDeletingPost] = useState(null);
 
-  useEffect(() => {
-    setPosts([
-      {
-        id: 1,
-        name: "Thomas Shen",
-        author: "Thomas Shen",
-        userId: 1,
-        subject: "Computer",
-        title: "what is Hackathon?",
-        description:
-          "I'm so excited for my hackathon tomorrow what should I do for preparation??",
-      },
-      {
-        id: 2,
-        name: "Natalee Chua",
-        author: "Natalee Chua",
-        userId: 2,
-        subject: "Math",
-        title: "what is SQL?",
-        description:
-          "next week I have the exam but i still don't understand about this topic",
-      },
-      {
-        id: 3,
-        name: "Thomas Shen",
-        author: "Thomas Shen",
-        userId: 1,
-        subject: "Physics",
-        title: "what is velocity?",
-        description: "Can someone help me understand velocity in simple terms?",
-      },
-      {
-        id: 4,
-        name: "A",
-        author: "A",
-        userId: 3,
-        subject: "Biology",
-        title: "Q1",
-        description: "D1",
-      },
-      {
-        id: 5,
-        name: "B",
-        author: "B",
-        userId: 4,
-        subject: "Math",
-        title: "Q2",
-        description: "D2",
-      },
-      {
-        id: 6,
-        name: "C",
-        author: "C",
-        userId: 5,
-        subject: "Physics",
-        title: "Q3",
-        description: "D3",
-      },
-      {
-        id: 7,
-        name: "D",
-        author: "D",
-        userId: 6,
-        subject: "Chemistry",
-        title: "Q4",
-        description: "D4",
-      },
-      {
-        id: 8,
-        name: "E",
-        author: "E",
-        userId: 7,
-        subject: "Math",
-        title: "Q5",
-        description: "D5",
-      },
-      {
-        id: 9,
-        name: "F",
-        author: "F",
-        userId: 8,
-        subject: "Computer",
-        title: "Q6",
-        description: "D6",
-      },
-    ]);
-  }, []);
-
-  // Functions สำหรับจัดการ Edit และ Delete
   const handleEdit = (post) => {
     setEditingPost(post);
     setShowEditPopup(true);
@@ -278,8 +207,7 @@ const HomePage = () => {
                   }
                 }}
               >
-                {/* แสดงปุ่มสามจุดเฉพาะ post ของ user ที่ login */}
-                {currentUserId && q.userId === currentUserId && (
+                {user?.id && q.userId === user?.id && (
                   <div
                     className="absolute top-4 right-4 text-xl text-gray-500 cursor-pointer menu-button"
                     onClick={(e) => {
@@ -315,7 +243,7 @@ const HomePage = () => {
                 )}
 
                 <div className="flex items-center gap-2 text-sm mb-2">
-                  <span className="text-gray-600">{q.author}</span>
+                  <span className="text-gray-600">{user?.fName}  {user?.sName}</span>
                   <span className="bg-[#FA812F] text-white px-2 py-0.5 text-xs rounded">
                     {q.subject}
                   </span>
@@ -362,7 +290,7 @@ const HomePage = () => {
               {
                 ...newPost,
                 id: prev.length + 1,
-                userId: currentUserId,
+                userId: user?.id,
                 author: "Current User",
               },
               ...prev,

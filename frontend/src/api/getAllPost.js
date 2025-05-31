@@ -1,8 +1,9 @@
 import { axiosInstance } from "./../axios";
 
-export const getAllCommentFromPost = async (postId) => {
+export const getAllPost = async () => {
   try {
-    const res = await axiosInstance.get(`/post/comments?postId=${postId}`);
+    const res = await axiosInstance.get("/post/getAll");
+    // console.log(res);
     return {
       success: true,
       data: res.data,

@@ -39,9 +39,29 @@ export const editPost = async (
 };
 
 export const deletePost = async (id: number) => {
-  await db.comment.deleteMany({ where: { postId: id } });
-  return db.post.delete({ where: { id } });
+  const comments = await db.comment.findMany({
+    where: { postId: id },
+    select: { id: true },
+  });
+
+  const commentIds = comments.map((c) => c.id);
+
+  await db.votes.deleteMany({
+    where: {
+      commentId: { in: commentIds },
+    },
+  });
+  await db.comment.deleteMany({
+    where: { postId: id },
+  });
+
+  await db.post.delete({
+    where: { id },
+  });
+
+  return { success: true };
 };
+
 
 export const getPost = async (id: number) => {
   const postForm = db.post.findUnique({
