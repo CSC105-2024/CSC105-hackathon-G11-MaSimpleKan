@@ -1,5 +1,8 @@
-import { React, useState } from "react";
+import {React, useState} from "react";
 import Navbar from "./../assets/Navbar.jsx";
+import CreatePostPopup from "./../popup/CreatePostPopup";
+import PostInformationPopup from "./../popup/PostInformation";
+
 
 const questions = [
     {
@@ -36,30 +39,37 @@ const subjects = ["Math", "Biology", "Physics", "Chemistry", "Computer"];
 
 const HomePage = () => {
     const [showDropdown, setShowDropdown] = useState(false);
+    const [openMenuId, setOpenMenuId] = useState(null);
+    const [showCreatePopup, setShowCreatePopup] = useState(false);
+    const [selectedPost, setSelectedPost] = useState(null);
 
     return (
         <>
-            <Navbar />
+            <Navbar/>
             <div className="max-w-6xl mx-auto px-4 py-10">
-                <div className="relative flex gap-4 items-center mb-10">
-                    <input
-                        type="text"
-                        placeholder="let’s drop the complex question"
-                        className="flex-1 border px-4 py-2 rounded-[5px] shadow-sm"
-                    />
+                <div className="flex flex-wrap md:flex-nowrap items-center gap-2 mb-6">
+                    <div
+                        onClick={() => setShowCreatePopup(true)}
+                        className="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md focus:outline-none cursor-text bg-white text-gray-500"
+                    >
+                        let’s drop the complex question
+                    </div>
+
                     <div className="relative">
                         <button
                             onClick={() => setShowDropdown((prev) => !prev)}
-                            className="bg-[#FFAD00] text-white px-4 py-2 rounded-md hover:bg-orange-500 transition"
+                            className="bg-[#FFAD00] text-white px-4 py-2 rounded-md hover:bg-orange-500 transition whitespace-nowrap"
                         >
                             Subject {showDropdown ? "▲" : "▼"}
                         </button>
+
                         {showDropdown && (
-                            <div className="absolute mt-1 bg-[#FFAD00] text-white rounded-md shadow-md w-full z-10">
+                            <div
+                                className="absolute right-0 mt-1 bg-[#FFAD00] text-white rounded-md shadow-md w-full z-10">
                                 {subjects.map((subject) => (
                                     <div
                                         key={subject}
-                                        className="px-4 py-2 hover:bg-orange-500 cursor-pointer"
+                                        className="px-4 py-2 hover:bg-white hover:text-[#FFAD00] cursor-pointer transition rounded-md"
                                         onClick={() => {
                                             setShowDropdown(false);
                                             console.log("Selected subject:", subject);
@@ -75,12 +85,46 @@ const HomePage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {questions.map((q) => (
-                        <div key={q.id} className="bg-white shadow-md rounded-lg p-4 space-y-2">
-                            <div className="text-sm text-gray-700 flex justify-between">
+                        <div
+                            key={q.id}
+                            className="bg-white rounded-xl shadow-md p-6 relative hover:bg-[#FFF1DC] hover:shadow-lg transition cursor-pointer"
+                            onClick={() => setSelectedPost(q)}
+                        >
+                        <div className="absolute top-4 right-4 text-xl text-gray-400 cursor-pointer"
+                                 onClick={() => setOpenMenuId(openMenuId === q.id ? null : q.id)}>
+                                ⋯
+                            </div>
+
+                            {openMenuId === q.id && (
+                                <div
+                                    className="absolute top-[36px] right-4 bg-[#FFAD00] text-white rounded-md shadow-md w-28 z-10 text-sm"
+                                >
+                                    <div
+                                        className="px-4 py-2 hover:bg-white hover:text-[#FFAD00] cursor-pointer transition rounded-md"
+                                        onClick={() => {
+                                            setOpenMenuId(null);
+                                            console.log("Edit", q.id);
+                                        }}
+                                    >
+                                        Edit
+                                    </div>
+                                    <div
+                                        className="px-4 py-2 hover:bg-white hover:text-[#FFAD00] cursor-pointer transition rounded-md"
+                                        onClick={() => {
+                                            setOpenMenuId(null);
+                                            console.log("Delete", q.id);
+                                        }}
+                                    >
+                                        Delete
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="text-sm text-gray-600 flex items-center gap-2 mb-2">
                                 <span>{q.name}</span>
-                                <span className="bg-[#FFAD00] text-white px-2 py-0.5 rounded text-xs">
-                  {q.subject}
-                </span>
+                                <span className="bg-[#FA812F] text-white px-2 py-0.5 text-xs rounded">
+        {q.subject}
+      </span>
                             </div>
                             <h2 className="text-lg font-semibold">{q.question}</h2>
                             <p className="text-sm text-gray-600">{q.description}</p>
@@ -88,16 +132,25 @@ const HomePage = () => {
                     ))}
                 </div>
 
-                {/* Pagination */}
-                <div className="flex justify-center mt-10">
-                    <div className="flex gap-2 items-center">
-                        <button className="w-6 h-6 rounded-full bg-[#FFAD00] text-white text-sm">
-                            1
-                        </button>
-                        <span className="text-xl">{">"}</span>
-                    </div>
+                <div className="mt-10 flex justify-center items-center gap-3">
+                    <button className="bg-[#FAB12F] text-white w-8 h-8 rounded-full font-semibold">
+                        1
+                    </button>
+                    <button className="text-xl text-[#FA812F] hover:text-[#FA4032]">
+                        &gt;
+                    </button>
                 </div>
             </div>
+            {showCreatePopup && (
+                <CreatePostPopup onClose={() => setShowCreatePopup(false)}/>
+            )}
+            {selectedPost && (
+                <PostInformationPopup
+                    post={selectedPost}
+                    onClose={() => setSelectedPost(null)}
+                />
+            )}
+
         </>
     );
 };
