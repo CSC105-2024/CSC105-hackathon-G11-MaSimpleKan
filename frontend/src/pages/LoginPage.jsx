@@ -32,6 +32,7 @@ const LoginPage = () => {
         const res = await userLogin(data);
         if (res.success) {
             localStorage.setItem("token", res.data.token);
+            localStorage.setItem("userId", res.data.userId);
             setLoginSuccess(true);
 
             setTimeout(() => {
