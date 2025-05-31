@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import Logo from "./Logo";
-import { Menu, X } from "lucide-react";
+// import Logo from "./Logo";
+// import { Menu, X } from "lucide-react";
 import { axiosInstance } from "../axios";
 
 export default function Navbar() {
