@@ -11,13 +11,14 @@ type createCommentBody = {
 export const createComment = async (c: Context) => {
   try {
     // //Waiting for Integration
-    // const userId = c.get("userId");
-    // const formData = await c.req.parseBody();
-    // const body = JSON.parse(formData.json as string);
-    // console.log(body);
-    const body = await c.req.json<createCommentBody>();
+    const userId = c.get("userId");
+    console.log(userId);
+    const formData = await c.req.parseBody();
+    const body = JSON.parse(formData.json as string);
+    console.log(body);
+    // const body = await c.req.json<createCommentBody>();
 
-    if (!body.text)
+    if (!body.text || !body.postId)
       return c.json(
         {
           success: false,
@@ -27,17 +28,16 @@ export const createComment = async (c: Context) => {
         400
       );
     //Integration
-    // if (!userId)
-    //   return c.json({
-    //     success: false,
-    //     msg: "userId is Undefinded",
-    //   });
+    if (!userId)
+      return c.json({
+        success: false,
+        msg: "userId is Undefinded",
+      });
 
     const newComment = await commentModel.createComment(
       body.text,
-      body.userId,
+      userId,
       body.postId
-      //userId
     );
     return c.json({
       success: true,
@@ -90,6 +90,7 @@ export const getComment = async (c: Context) => {
 export const increaseCorrect = async (c: Context) => {
   try {
     const id = c.req.query("id");
+    const userId = c.get("userId");
     if (!id) {
       return c.json({
         success: false,
@@ -98,10 +99,10 @@ export const increaseCorrect = async (c: Context) => {
       });
     }
 
-    const correct = await commentModel.increaseCorrectCount(parseInt(id));
+    await commentModel.increaseCorrectCount(parseInt(id), parseInt(userId));
     return c.json({
       success: true,
-      data: correct,
+      data: null,
       msg: "Increased Correct!",
     });
   } catch (e) {
@@ -119,6 +120,7 @@ export const increaseCorrect = async (c: Context) => {
 export const decreaseCorrect = async (c: Context) => {
   try {
     const id = c.req.query("id");
+    const userId = c.get("userId");
     if (!id) {
       return c.json({
         success: false,
@@ -127,11 +129,11 @@ export const decreaseCorrect = async (c: Context) => {
       });
     }
 
-    const correct = await commentModel.decreaseCorrectCount(parseInt(id));
+    await commentModel.decreaseCorrectCount(parseInt(id), parseInt(userId));
     return c.json({
       success: true,
-      data: correct,
-      msg: "decreased Correct!",
+      data: null,
+      msg: "Decreased Correct!",
     });
   } catch (e) {
     return c.json(
@@ -148,6 +150,7 @@ export const decreaseCorrect = async (c: Context) => {
 export const increaseSimple = async (c: Context) => {
   try {
     const id = c.req.query("id");
+    const userId = c.get("userId");
     if (!id) {
       return c.json({
         success: false,
@@ -156,10 +159,10 @@ export const increaseSimple = async (c: Context) => {
       });
     }
 
-    const correct = await commentModel.increaseSimpleCount(parseInt(id));
+    await commentModel.increaseSimpleCount(parseInt(id), parseInt(userId));
     return c.json({
       success: true,
-      data: correct,
+      data: null,
       msg: "Increased Simple!",
     });
   } catch (e) {
@@ -177,6 +180,7 @@ export const increaseSimple = async (c: Context) => {
 export const decreaseSimple = async (c: Context) => {
   try {
     const id = c.req.query("id");
+    const userId = c.get("userId");
     if (!id) {
       return c.json({
         success: false,
@@ -185,11 +189,11 @@ export const decreaseSimple = async (c: Context) => {
       });
     }
 
-    const correct = await commentModel.decreaseSimpleCount(parseInt(id));
+    await commentModel.decreaseSimpleCount(parseInt(id), parseInt(userId));
     return c.json({
       success: true,
-      data: correct,
-      msg: "decreased Simple!",
+      data: null,
+      msg: "Decreased Simple!",
     });
   } catch (e) {
     return c.json(

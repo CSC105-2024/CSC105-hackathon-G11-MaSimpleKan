@@ -4,15 +4,15 @@ import { authMiddleware } from "../middlewares/authMiddleware.ts";
 
 const commentRouter = new Hono();
 
-commentRouter.post("/create", commentController.createComment);
+// commentRouter.post("/create", commentController.createComment);
 commentRouter.get("/get", commentController.getComment);
-commentRouter.patch("/inCorrect", commentController.increaseCorrect);
-commentRouter.delete("/deCorrect",  commentController.decreaseCorrect);
-commentRouter.patch("/inSimple", commentController.increaseSimple);
-commentRouter.delete("/deSimple",  commentController.decreaseSimple);
+commentRouter.patch("/inCorrect", authMiddleware, commentController.increaseCorrect);
+commentRouter.delete("/deCorrect", authMiddleware, commentController.decreaseCorrect);
+commentRouter.patch("/inSimple", authMiddleware,commentController.increaseSimple);
+commentRouter.delete("/deSimple",  authMiddleware,commentController.decreaseSimple);
 
-//Integration
-//commentRouter.post("/create", authMiddleware, commentController.createComment);
+// integration
+commentRouter.post("/create", authMiddleware, commentController.createComment);
 
 
 export { commentRouter };

@@ -24,14 +24,15 @@ model User {
   tel      String
   Post     Post[]
   Comment  Comment[]
+  Votes Votes[]
 }
 
 enum Subject {
-  math
-  biology
-  chemistry
-  physics
-  computer
+  Math
+  Biology
+  Chemistry
+  Physics
+  Computer
 }
 
 model Post {
@@ -50,12 +51,30 @@ model Post {
 model Comment {
   id           Int    @id @default(autoincrement())
   text         String
-  correctCount Int @default(0)
-  simpleCount  Int @default(0)
+  correctCount Int    @default(0)
+  simpleCount  Int    @default(0)
 
   userId Int
   User   User @relation(fields: [userId], references: [id])
 
   postId Int
   Post   Post @relation(fields: [postId], references: [id])
+  Votes Votes[]
+}
+
+enum VoteType {
+  Correct
+  Simple
+}
+
+model Votes {
+  id String @id @default(uuid())
+  commentId Int 
+  userId Int
+  voteType VoteType
+  Comment Comment @relation(fields: [commentId], references: [id])
+  User User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, commentId, voteType])
+  @@index([userId, commentId, voteType])
 }

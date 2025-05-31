@@ -21,14 +21,20 @@ export const getComment = async (id: number) => {
     where: {
       id,
     },
+    include: {
+        Votes: true
+    }
   });
   return commentForm;
 };
 
-export const getAllCommentFromPost = async (postId:number) => {
+export const getAllCommentFromPost = async (postId: number) => {
   const commentForm = db.comment.findMany({
     where: {
-        postId
+      postId,
+    },
+    include: {
+      Votes: true,
     },
     orderBy: [
       {
@@ -42,58 +48,104 @@ export const getAllCommentFromPost = async (postId:number) => {
   return commentForm;
 };
 
-export const increaseCorrectCount = async (id:number)=> {
-    const commentForm = db.comment.update({
-        where:{
-            id
+export const increaseCorrectCount = async (
+  id: number,
+  userId: number
+) => {
+  await Promise.all([
+    db.comment.update({
+      where: {
+        id,
+      },
+      data: {
+        correctCount: {
+          increment: 1,
         },
-        data:{
-            correctCount:{
-                increment:1
-            }
-        }
-    })
-    return commentForm
-}
+      },
+    }),
+    db.votes.create({
+      data: {
+        commentId: id,
+        userId,
+        voteType: "Correct",
+      },
+    }),
+  ]);
+  return null;
+};
 
-export const decreaseCorrectCount = async (id:number)=> {
-    const commentForm = db.comment.update({
-        where:{
-            id
+export const decreaseCorrectCount = async (id: number, userId: number) => {
+  await Promise.all([
+    db.comment.update({
+      where: {
+        id,
+      },
+      data: {
+        correctCount: {
+          decrement: 1,
         },
-        data:{
-            correctCount:{
-                decrement: 1
-            }
+      },
+    }),
+    db.votes.delete({
+      where: {
+        userId_commentId_voteType: {
+          userId,
+          commentId: id,
+          voteType: "Correct"
         }
-    })
-    return commentForm
-}
+      },
+    }),
+  ]);
+  return null;
+};
 
-export const increaseSimpleCount = async (id:number)=> {
-    const commentForm = db.comment.update({
-        where:{
-            id
+export const increaseSimpleCount = async (
+  id: number,
+  userId: number
+) => {
+  await Promise.all([
+    db.comment.update({
+      where: {
+        id,
+      },
+      data: {
+        simpleCount: {
+          increment: 1,
         },
-        data:{
-            simpleCount:{
-                increment:1
-            }
-        }
-    })
-    return commentForm
-}
+      },
+    }),
+    db.votes.create({
+      data: {
+        commentId: id,
+        userId,
+        voteType: "Simple",
+      },
+    }),
+  ]);
+  return null;
+};
 
-export const decreaseSimpleCount = async (id:number)=> {
-    const commentForm = db.comment.update({
-        where:{
-            id
+export const decreaseSimpleCount = async (id: number, userId: number) => {
+  await Promise.all([
+    db.comment.update({
+      where: {
+        id,
+      },
+      data: {
+        simpleCount: {
+          decrement: 1,
         },
-        data:{
-            simpleCount:{
-                decrement: 1
-            }
+      },
+    }),
+    db.votes.delete({
+      where: {
+        userId_commentId_voteType: {
+          userId,
+          commentId: id,
+          voteType: "Simple"
         }
-    })
-    return commentForm
-}
+      },
+    }),
+  ]);
+  return null;
+};

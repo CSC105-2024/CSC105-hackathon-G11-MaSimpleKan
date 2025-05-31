@@ -166,8 +166,8 @@ export const loginUser = async (c: Context) => {
 
 export const getAllPostFromUser = async (c: Context) => {   
   try {
-    //const userId = c.get("userId");
-    const userId = c.req.query("userId");
+    const userId = c.get("userId");
+    // const userId = c.req.query("userId");
     if (userId) {
       const data = await postModel.getAllPostFromUser(parseInt(userId));
       return c.json(data, 200);
@@ -177,6 +177,35 @@ export const getAllPostFromUser = async (c: Context) => {
         success: false,
         data: null,
         msg: "UserId undefined!",
+      },
+      400
+    );
+  } catch (e) {
+    return c.json(
+      {
+        success: false,
+        data: null,
+        msg: `${e}`,
+      },
+      500
+    );
+  }
+};
+
+export const getUserLoggedIn = async (c: Context) => {
+  
+  try {
+    const userId = c.get("userId");
+    //const userId = c.req.query("userId")
+    if (userId !== undefined && userId !== null) {
+      const data = await userModel.getUserLoggedIn(parseInt(userId));
+      return c.json(data, 200);
+    }
+    return c.json(
+      {
+        success: false,
+        data: null,
+        msg: "Missing required fields",
       },
       400
     );
