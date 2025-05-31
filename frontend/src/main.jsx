@@ -4,11 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import App from "./App.jsx";
 
-createRoot(document.getElementById("root")).render(
-    <StrictMode>
-        <RouterProvider router={router} />
-    </StrictMode>
-);
+
 
 const router = createBrowserRouter([
     {
@@ -16,3 +12,8 @@ const router = createBrowserRouter([
         element: <App />, // Render the App component
     },
 ]);
+createRoot(document.getElementById("root")).render(
+    <StrictMode>
+        <RouterProvider router={router} />
+    </StrictMode>
+)
