@@ -1,60 +1,133 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { z } from "zod";
 
 const commentSchema = z.object({
     comment: z.string().trim().min(1, { message: "Comment cannot be empty." }),
 });
 
-const mockAnswers = [
-    {
-        name: "Mariya Mamacita",
-        content: `SQL is a language we use to talk to databases...`,
-    },
-    {
-        name: "Doja Fishing",
-        content: `SQL is a tool that helps you work with data stored in a database...`,
-    },
-];
-
 const PostInformationPopup = ({ post, onClose }) => {
     const [comment, setComment] = useState("");
-    const [comments, setComments] = useState([]); // เก็บคอมเมนต์ที่ผู้ใช้เพิ่ม
+    const [comments, setComments] = useState([]);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
-    const [clickedCorrects, setClickedCorrects] = useState(Array(mockAnswers.length).fill(false));
-    const [clickedSimples, setClickedSimples] = useState(Array(mockAnswers.length).fill(false));
-    const [correctCounts, setCorrectCounts] = useState(Array(mockAnswers.length).fill(0));
-    const [simpleCounts, setSimpleCounts] = useState(Array(mockAnswers.length).fill(0));
+    const [loading, setLoading] = useState(true);
 
-    const toggleCorrect = (index) => {
-        const updated = [...clickedCorrects];
-        const updatedCounts = [...correctCounts];
-        updated[index] = !updated[index];
-        updatedCounts[index] += updated[index] ? 1 : -1;
-        setClickedCorrects(updated);
-        setCorrectCounts(updatedCounts);
-    };
+    const [userVotes, setUserVotes] = useState({
+        // commentId: { correct: boolean, simple: boolean }
+    });
 
-    const toggleSimple = (index) => {
-        const updated = [...clickedSimples];
-        const updatedCounts = [...simpleCounts];
-        updated[index] = !updated[index];
-        updatedCounts[index] += updated[index] ? 1 : -1;
-        setClickedSimples(updated);
-        setSimpleCounts(updatedCounts);
-    };
+    useEffect(() => {
+        const fetchComments = async () => {
+            setLoading(true);
+            try {
+                await new Promise(resolve => setTimeout(resolve, 500));
 
-    const handleSubmit = () => {
+                const commentsData = mockComments.filter(comment => comment.postId === post.id);
+                setComments(commentsData);
+            } catch (error) {
+                console.error("Error fetching comments:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (post.id) {
+            fetchComments();
+        }
+    }, [post.id]);
+
+    const handleSubmit = async () => {
         const result = commentSchema.safeParse({ comment });
         if (!result.success) {
             setError(result.error.format().comment?._errors[0] || "Invalid comment");
             setSuccess(false);
-        } else {
+            return;
+        }
+
+        const userId = Number(localStorage.getItem("userId")) || 999; // ใช้ 999 เป็น default
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            const newComment = {
+                id: Date.now(), // ใช้ timestamp เป็น id
+                text: comment,
+                userId: userId,
+                postId: post.id,
+                correctCount: 0,
+                simpleCount: 0,
+                userName: "You"
+            };
+
             setError("");
             setSuccess(true);
-            setComments((prev) => [...prev, { name: "You", content: comment }]);
             setComment("");
+
+            // เพิ่ม comment ใหม่เข้าไปใน list
+            setComments(prev => [newComment, ...prev]);
+
             setTimeout(() => setSuccess(false), 3000);
+        } catch (error) {
+            setError("Network error occurred");
+            console.error("Error creating comment:", error);
+        }
+    };
+
+    const handleCorrectToggle = async (commentId) => {
+        try {
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const isCurrentlyClicked = userVotes[commentId]?.correct || false;
+
+            setUserVotes(prev => ({
+                ...prev,
+                [commentId]: {
+                    ...prev[commentId],
+                    correct: !isCurrentlyClicked
+                }
+            }));
+
+            setComments(prev => prev.map(c =>
+                c.id === commentId
+                    ? {
+                        ...c,
+                        correctCount: isCurrentlyClicked
+                            ? Math.max(0, c.correctCount - 1)
+                            : c.correctCount + 1
+                    }
+                    : c
+            ));
+        } catch (error) {
+            console.error("Error toggling correct:", error);
+        }
+    };
+
+    const handleSimpleToggle = async (commentId) => {
+        try {
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const isCurrentlyClicked = userVotes[commentId]?.simple || false;
+
+            setUserVotes(prev => ({
+                ...prev,
+                [commentId]: {
+                    ...prev[commentId],
+                    simple: !isCurrentlyClicked
+                }
+            }));
+
+            setComments(prev => prev.map(c =>
+                c.id === commentId
+                    ? {
+                        ...c,
+                        simpleCount: isCurrentlyClicked
+                            ? Math.max(0, c.simpleCount - 1)
+                            : c.simpleCount + 1
+                    }
+                    : c
+            ));
+        } catch (error) {
+            console.error("Error toggling simple:", error);
         }
     };
 
@@ -69,10 +142,10 @@ const PostInformationPopup = ({ post, onClose }) => {
                 </button>
 
                 <div className="flex items-center gap-2 mb-4">
-                    <div className="text-sm font-semibold">{post.name}</div>
+                    <div className="text-sm font-semibold">{post.name || post.author}</div>
                     <span className="bg-[#FA812F] text-white text-xs px-2 py-0.5 rounded font-medium">
-            {post.subject}
-          </span>
+                        {post.subject}
+                    </span>
                 </div>
 
                 <h2 className="text-lg font-bold mb-1">Title</h2>
@@ -92,7 +165,7 @@ const PostInformationPopup = ({ post, onClose }) => {
                             type="text"
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
-                            placeholder="let’s help them on your simple ways!"
+                            placeholder="let's help them on your simple ways!"
                             className="flex-1 px-4 py-2 rounded-md shadow bg-white"
                         />
                         <button
@@ -110,42 +183,45 @@ const PostInformationPopup = ({ post, onClose }) => {
                     )}
                 </div>
 
-                {comments.map((c, idx) => (
-                    <div key={idx} className="mb-6 bg-[#fdf8f1] p-4 rounded">
-                        <p className="font-semibold mb-1">{c.name}</p>
-                        <p className="text-sm text-gray-800">{c.content}</p>
-                    </div>
-                ))}
+                {loading ? (
+                    <div className="text-center py-4">Loading comments...</div>
+                ) : (
+                    <>
+                        {comments.length === 0 ? (
+                            <div className="text-center py-4 text-gray-500">No comments yet</div>
+                        ) : (
+                            comments.map((commentItem) => (
+                                <div key={commentItem.id} className="mb-6 bg-[#fdf8f1] p-4 rounded">
+                                    <p className="font-semibold mb-1">User {commentItem.userId}</p>
+                                    <p className="text-sm text-gray-800 mb-3">{commentItem.text}</p>
+                                    <div className="flex gap-2 items-center">
+                                        <button
+                                            onClick={() => handleCorrectToggle(
+                                                commentItem.id,
+                                                commentItem.correctCount,
+                                                false
+                                            )}
+                                            className="px-3 py-1 text-sm font-semibold rounded-md border bg-[#FFF1DC] text-black border-black hover:bg-green-500 hover:text-white transition-all"
+                                        >
+                                            Correct ({commentItem.correctCount || 0})
+                                        </button>
 
-                {mockAnswers.map((answer, idx) => (
-                    <div key={idx} className="mb-6 bg-[#fdf8f1] p-4 rounded">
-                        <p className="font-semibold mb-1">{answer.name}</p>
-                        <p className="text-sm text-gray-800 mb-3">{answer.content}</p>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => toggleCorrect(idx)}
-                                className={`px-3 py-1 text-sm font-semibold rounded-md border transition-all ${
-                                    clickedCorrects[idx]
-                                        ? "bg-green-500 text-white border-none"
-                                        : "bg-[#FFF1DC] text-black border-black"
-                                }`}
-                            >
-                                Correct
-                            </button>
-
-                            <button
-                                onClick={() => toggleSimple(idx)}
-                                className={`px-3 py-1 text-sm font-semibold rounded-md border transition-all ${
-                                    clickedSimples[idx]
-                                        ? "bg-orange-500 text-white border-none"
-                                        : "bg-[#FFF1DC] text-black border-black"
-                                }`}
-                            >
-                                Simple
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                                        <button
+                                            onClick={() => handleSimpleToggle(
+                                                commentItem.id,
+                                                commentItem.simpleCount,
+                                                false
+                                            )}
+                                            className="px-3 py-1 text-sm font-semibold rounded-md border bg-[#FFF1DC] text-black border-black hover:bg-orange-500 hover:text-white transition-all"
+                                        >
+                                            Simple ({commentItem.simpleCount || 0})
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );
