@@ -1,12 +1,34 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const subjects = ["Computer", "Math", "Biology", "Physics", "Chemistry"];
+const subjectEnum = ["Computer", "Math", "Biology", "Physics", "Chemistry"];
+
+const postSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    subject: z.enum(subjectEnum),
+    description: z.string().min(1, "Description is required"),
+});
 
 const CreatePostPopup = ({ onClose }) => {
-    const [title, setTitle] = useState("");
-    const [subject, setSubject] = useState(subjects[0]);
-    const [description, setDescription] = useState("");
     const [success, setSuccess] = useState(false);
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm({
+        resolver: zodResolver(postSchema),
+    });
+
+    const onSubmit = (data) => {
+        console.log("✅ Submitted post:", data);
+        setSuccess(true);
+        reset();
+        setTimeout(() => setSuccess(false), 3000);
+    };
 
     return (
         <div className="fixed inset-0 backdrop-blur-xs bg-opacity-40 z-50 flex items-center justify-center">
@@ -20,61 +42,73 @@ const CreatePostPopup = ({ onClose }) => {
 
                 <h2 className="text-2xl font-bold mb-6">Create post</h2>
 
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="flex-1">
-                        <label className="block font-semibold mb-1">Title</label>
-                        <input
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Please help me with Java"
-                            className="w-full px-4 py-2 rounded-md shadow text-black bg-white"
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex-1">
+                            <label className="block font-semibold mb-1">Title</label>
+                            <input
+                                {...register("title")}
+                                placeholder="Please help me with Java"
+                                className="w-full px-4 py-2 rounded-md shadow bg-white text-black"
+                            />
+                            {errors.title && (
+                                <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+                            )}
+                        </div>
+
+                        <div className="flex-1">
+                            <label className="block font-semibold mb-1">Subject</label>
+                            <select
+                                {...register("subject")}
+                                className="w-full px-4 py-2 rounded-md shadow bg-white text-black"
+                            >
+                                {subjectEnum.map((s) => (
+                                    <option key={s} value={s}>
+                                        {s}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.subject && (
+                                <p className="text-red-500 text-sm mt-1">{errors.subject.message}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block font-semibold mb-1">Description</label>
+                        <textarea
+                            {...register("description")}
+                            placeholder="I want to pass my exam..."
+                            rows={4}
+                            className="w-full px-4 py-2 rounded-md shadow resize-none bg-white text-black"
                         />
+                        {errors.description && (
+                            <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
+                        )}
                     </div>
 
-                    <div className="flex-1">
-                        <label className="block font-semibold mb-1">Subject</label>
-                        <select
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            className="w-full px-4 py-2 rounded-md shadow text-black bg-white"
+                    <div className="flex justify-end gap-4">
+                        <button
+                            type="submit"
+                            className="bg-[#FFAD00] hover:bg-[#f59e0b] text-white font-semibold px-6 py-2 rounded-md"
                         >
-                            {subjects.map((s) => (
-                                <option key={s} value={s}>
-                                    {s}
-                                </option>
-                            ))}
-                        </select>
+                            Post
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="border border-[#FFAD00] text-[#FFAD00] font-semibold px-6 py-2 rounded-md hover:bg-[#FFF7E6]"
+                        >
+                            Cancel
+                        </button>
                     </div>
-                </div>
+                </form>
 
-                <div className="mb-6">
-                    <label className="block font-semibold mb-1">Description</label>
-                    <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="I want to pass my exam..."
-                        rows={4}
-                        className="w-full px-4 py-2 rounded-md shadow resize-none text-black bg-white"
-                    />
-                </div>
-
-                <div className="flex justify-end gap-4">
-                    <button
-                        onClick={() => {
-                            setSuccess(true);
-                            setTimeout(() => setSuccess(false), 3000); // ซ่อนแจ้งเตือนหลัง 3 วิ
-                        }}
-                        className="bg-[#FFAD00] hover:bg-[#f59e0b] text-white font-semibold px-6 py-2 rounded-md"
-                    >
-                        Post
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="border border-[#FFAD00] text-[#FFAD00] font-semibold px-6 py-2 rounded-md hover:bg-[#FFF7E6]"
-                    >
-                        Cancel
-                    </button>
-                </div>
+                {success && (
+                    <div className="mt-6 text-center bg-white text-green-600 border border-green-400 px-4 py-2 rounded-md shadow">
+                        ✅ Create success!
+                    </div>
+                )}
             </div>
         </div>
     );
