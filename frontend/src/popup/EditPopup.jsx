@@ -1,113 +1,80 @@
-import React, { useState, useEffect, useRef } from "react";
-import Navbar from "../assets/Navbar.jsx";
-import EditPopup from "../popup/EditPopup";
-import DeletePopup from "../popup/DeletePopup";
-import "../index.css";
+import React, { useState, useEffect } from "react";
 
-function Profile() {
-    const posts = [
-        {
-            id: 1,
-            author: "Natalee Chua",
-            subject: "Math",
-            title: "what is SQL?",
-            description:
-                "next week I have the exam but I still don’t understand about this topic. Can anyone help me? if you have any resources or tips, please share! I would really appreciate it.",
-        },
-        {
-            id: 2,
-            author: "Natalee Chua",
-            subject: "Computer",
-            title: "what is a hook in React?",
-            description:
-                "I keep hearing about useEffect and useState but don’t get it.",
-        },
-        {
-            id: 3,
-            author: "Natalee Chua",
-            subject: "Math",
-            title: "why is integration so hard?",
-            description:
-                "Trying to understand how to set limits for double integrals.",
-        },
-        {
-            id: 4,
-            author: "Natalee Chua",
-            subject: "Computer",
-            title: "What’s the difference between let and const?",
-            description: "Still confused even after reading docs many times!",
-        },
-    ];
-    const subjectEnum = ["Math", "Biology", "Physics", "Chemistry", "Computer"];
-    const [openMenuIndex, setOpenMenuIndex] = useState(null);
-    const cardRefs = useRef([]);
-    const [showEdit, setShowEdit] = useState(false);
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [showConfirm, setShowConfirm] = useState(false);
-    const [indexToDelete, setIndexToDelete] = useState(null);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [selectedSubject, setSelectedSubject] = useState(null);
+function EditPopup({ trigger, item, onCancel, onSave }) {
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [subject, setSubject] = useState("Math");
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (
-                openMenuIndex !== null &&
-                cardRefs.current[openMenuIndex] &&
-                !cardRefs.current[openMenuIndex].contains(event.target)
-            ) {
-                setOpenMenuIndex(null);
-            }
-        };
+        if (item) {
+            setTitle(item.title);
+            setDescription(item.description);
+            setSubject(item.subject || "Math");
+        }
+    }, [item]);
 
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
+    const handleEdit = () => {
+        const updatedItem = {
+            ...item,
+            title,
+            description,
+            subject,
+            index: item.index,
         };
-    }, [openMenuIndex]);
+        onSave(updatedItem);
+    };
 
-    const filteredPosts = selectedSubject
-        ? posts.filter((post) => post.subject === selectedSubject)
-        : posts;
+    if (!trigger) return null;
 
     return (
-        <div className="min-h-screen bg-[#F5F5F5]">
-            <Navbar />
-            <div className="max-w-6xl mx-auto px-6 py-10">
-                <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
-                    <input
-                        type="text"
-                        placeholder="let’s drop the complex question"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none"
-                    />
-                    <div className="md:ml-auto md:w-auto w-full flex justify-end">
-                        <div className="relative w-fit">
+        <div className="fixed inset-0 flex justify-center items-center bg-[#00000033] backdrop-blur-sm z-50 px-4">
+            <div className="bg-[#FFF1DC] p-6 sm:p-8 rounded-lg shadow-lg w-full max-w-xl relative">
+                <button
+                    onClick={onCancel}
+                    className="absolute top-4 right-4 text-gray-700 text-xl hover:text-red-500"
+                >
+                    &times;
+                </button>
+
+                <h2 className="text-xl font-semibold mb-6">Edit post</h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block font-medium mb-1">Title</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block font-medium mb-1">Subject</label>
+                        <div className="relative">
                             <button
-                                onClick={() => setShowDropdown((prev) => !prev)}
-                                className="bg-[#FFAD00] text-white px-4 py-2 rounded-md hover:bg-orange-500 transition whitespace-nowrap w-full md:w-auto"
+                                onClick={() => setDropdownOpen(!dropdownOpen)}
+                                className="bg-[#FAB12F] text-white w-full px-4 py-2 rounded-md flex justify-between items-center"
                             >
-                                {selectedSubject || "Subject"} {showDropdown ? "▲" : "▼"}
+                                {subject}
+                                <span className="ml-2">{dropdownOpen ? "▲" : "▼"}</span>
                             </button>
-                            {showDropdown && (
-                                <div className="absolute right-0 mt-1 bg-[#FFAD00] text-white rounded-md shadow-md min-w-[120px] z-10">
-                                    <div
-                                        className="px-4 py-2 hover:bg-white hover:text-[#FFAD00] cursor-pointer transition rounded-md"
-                                        onClick={() => {
-                                            setSelectedSubject(null);
-                                            setShowDropdown(false);
-                                        }}
-                                    >
-                                        All
-                                    </div>
-                                    {subjectEnum.map((subject) => (
+
+                            {dropdownOpen && (
+                                <div className="absolute mt-1 w-full bg-[#FAB12F] rounded-md shadow-lg z-50">
+                                    {["Math", "Biology", "Physics", "Chemistry", "Computer"].map((s) => (
                                         <div
-                                            key={subject}
-                                            className="px-4 py-2 hover:bg-white hover:text-[#FFAD00] cursor-pointer transition rounded-md"
+                                            key={s}
+                                            className={`px-4 py-2 cursor-pointer hover:bg-white hover:text-[#FA812F] ${
+                                                subject === s ? "bg-white text-[#FA812F]" : "text-white"
+                                            }`}
                                             onClick={() => {
-                                                setSelectedSubject(subject);
-                                                setShowDropdown(false);
+                                                setSubject(s);
+                                                setDropdownOpen(false);
                                             }}
                                         >
-                                            {subject}
+                                            {s}
                                         </div>
                                     ))}
                                 </div>
@@ -116,87 +83,33 @@ function Profile() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {filteredPosts.map((post, i) => (
-                        <div
-                            key={post.id}
-                            ref={(el) => (cardRefs.current[i] = el)}
-                            className="bg-white rounded-xl shadow-md p-6 py-10 relative hover:bg-[#FFF1DC] hover:shadow-lg transition min-h-[200px]"
-                        >
-                            <div
-                                className="absolute top-4 right-4 text-xl text-gray-500 cursor-pointer"
-                                onClick={() => setOpenMenuIndex(openMenuIndex === i ? null : i)}
-                            >
-                                ⋯
-                            </div>
-
-                            {openMenuIndex === i && (
-                                <div className="absolute top-10 right-1 bg-[#FAB12F] text-white rounded-md shadow-md flex flex-col items-center text-sm z-10 overflow-hidden">
-                                    <button
-                                        className="px-4 py-2 w-full text-center hover:bg-white hover:text-[#FA812F] transition"
-                                        onClick={() => {
-                                            setSelectedItem({ ...post, index: i });
-                                            setShowEdit(true);
-                                            setOpenMenuIndex(null);
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        className="px-4 py-2 w-full text-center hover:bg-white hover:text-[#FA812F] transition"
-                                        onClick={() => {
-                                            setIndexToDelete(i);
-                                            setShowConfirm(true);
-                                            setOpenMenuIndex(null);
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            )}
-
-                            <div className="flex items-center gap-2 text-sm mb-2">
-                                <span className="text-gray-600">{post.author}</span>
-                                <span className="bg-[#FA812F] text-white px-2 py-0.5 text-xs rounded">
-                                    {post.subject}
-                                </span>
-                            </div>
-                            <h2 className="font-bold text-lg mb-1">{post.title}</h2>
-                            <p className="text-sm text-gray-700 truncate-2-lines">
-                                {post.description}
-                            </p>
-                        </div>
-                    ))}
+                <div className="mt-6">
+                    <label className="block font-medium mb-1">Description</label>
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none"
+                        rows={4}
+                    />
                 </div>
 
-                <div className="mt-10 flex justify-center items-center gap-3">
-                    <button className="bg-[#FAB12F] text-white w-8 h-8 rounded-full font-semibold">
-                        1
+                <div className="mt-6 flex flex-col sm:flex-row justify-end gap-4">
+                    <button
+                        onClick={handleEdit}
+                        className="bg-[#FAB12F] text-white px-5 py-2 rounded-md hover:bg-[#f89f1d]"
+                    >
+                        Edit
                     </button>
-                    <button className="text-xl text-[#FA812F] hover:text-[#FA4032]">
-                        &gt;
+                    <button
+                        onClick={onCancel}
+                        className="border border-[#FAB12F] text-[#FAB12F] px-5 py-2 rounded-md hover:bg-[#fff8ef]"
+                    >
+                        Cancel
                     </button>
                 </div>
-
-                <EditPopup
-                    trigger={showEdit}
-                    item={selectedItem}
-                    onCancel={() => setShowEdit(false)}
-                    onSave={(updatedItem) => {
-                        setShowEdit(false);
-                    }}
-                />
-
-                <DeletePopup
-                    trigger={showConfirm}
-                    onCancel={() => setShowConfirm(false)}
-                    onConfirm={() => {
-                        setShowConfirm(false);
-                    }}
-                />
             </div>
         </div>
     );
 }
 
-export default Profile;
+export default EditPopup;
