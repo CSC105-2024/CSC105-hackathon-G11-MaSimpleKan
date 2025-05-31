@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
+import PrivateRoute from "./assets/PrivateRoute";
 
 const router = createBrowserRouter([
     {
@@ -15,11 +16,19 @@ const router = createBrowserRouter([
     },
     {
         path: "/home",
-        element: <HomePage />,
+        element: (
+            <PrivateRoute>
+                <HomePage />
+            </PrivateRoute>
+        ),
     },
     {
         path: "/profile",
-        element: <ProfilePage />,
+        element: (
+            <PrivateRoute>
+                <ProfilePage />
+            </PrivateRoute>
+        ),
     },
     {
         path: "/signup",
