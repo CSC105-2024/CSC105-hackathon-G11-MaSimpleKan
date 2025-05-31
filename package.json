@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@hono/node-server": "^1.14.3",
+    "axios": "^1.9.0",
+    "hono": "^4.7.10"
+  }
+}
