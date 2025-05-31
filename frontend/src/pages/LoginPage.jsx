@@ -3,9 +3,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TabSwitcher from "../pages/TabSwitcher";
 import BookLogo from "../../public/BookLogo.png";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import { userLogin } from './../api/userLogin';
+import { userLogin } from "../api/userLogin";
 
 const loginSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -13,12 +13,12 @@ const loginSchema = z.object({
 });
 
 const LoginPage = () => {
+    const [loginSuccess, setLoginSuccess] = useState(false);
+    const navigate = useNavigate();
+
     useEffect(() => {
         document.title = "Login";
     }, []);
-
-    const [loginSuccess, setLoginSuccess] = useState(false);
-    const navigate = useNavigate();
 
     const {
         register,
@@ -29,28 +29,31 @@ const LoginPage = () => {
     });
 
     const onSubmit = async (data) => {
-        const res = await userLogin(data);
+        const res = await userLogin(data); // ← ต้อง import ฟังก์ชันนี้จริงจัง
         if (res.success) {
             localStorage.setItem("isLoggedIn", "true");
-            localStorage.setItem("userId", (res.data.data));
-            console.log(localStorage.getItem("userId"))
+            localStorage.setItem("userId", res.data.data);
             setLoginSuccess(true);
-            setTimeout(() => {
-                navigate("/");
-            }, 1500);
+            setTimeout(() => navigate("/"), 1500);
         } else {
-            alert("Error loggin in. Try again!");
+            alert("Error logging in. Try again!");
         }
     };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-gray-200 px-4 sm:px-6">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md md:max-w-lg p-6 sm:p-8 md:p-10">
+        <div className="h-screen flex w-full bg-white">
+            <div className="w-1/2 hidden md:block">
+                <img
+                    src="../../public/HomePic.png"
+                    alt="login"
+                    className="w-full h-full object-cover"
+                />
+            </div>
+
+            <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-16">
                 <div className="flex items-center justify-center space-x-2 mb-6">
-                    <img src={BookLogo} alt="Book Logo" className="w-8 h-8" />
-                    <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-[#FFAD00]">
-                        Ma Simple Kan
-                    </h1>
+                    <img src={BookLogo} alt="Book Logo" className="w-6 h-6" />
+                    <h1 className="text-2xl font-bold text-[#FFAD00]">Ma Simple Kan</h1>
                 </div>
 
                 <TabSwitcher />
@@ -61,7 +64,7 @@ const LoginPage = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-6">
                     <div>
                         <label className="text-sm font-semibold text-black">Email</label>
                         <input
