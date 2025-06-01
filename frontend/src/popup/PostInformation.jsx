@@ -5,8 +5,9 @@ import { z } from "zod";
 import { createComment } from "../api/createComment";
 import { increaseCorrect } from "../api/increaseCorrect";
 import { decreaseCorrect } from "../api/decreaseCorrect";
-import { increaseSimple } from './../api/increaseSimple';
-import { decreaseSimple } from './../api/decreaseSimple';
+import { increaseSimple } from "./../api/increaseSimple";
+import { decreaseSimple } from "./../api/decreaseSimple";
+import { getCommentUser } from "../api/getCommentUser";
 
 const commentSchema = z.object({
   text: z.string().trim().min(1, { message: "Comment cannot be empty." }),
@@ -24,6 +25,7 @@ const PostInformationPopup = ({ post, onClose }) => {
   });
 
   const [user, setUser] = useState(null);
+  const [userComment, setUserComment] = useState(null);
 
   useEffect(() => {
     const getUserData = async () => {
@@ -35,13 +37,23 @@ const PostInformationPopup = ({ post, onClose }) => {
   }, [post?.userId]);
 
   useEffect(() => {
+    const getUserDataC = async () => {
+      if (!post?.id) return;
+      const data = await getCommentUser(post.id);
+      setUserComment(data.data);
+      console.log(data.data);
+    };
+    getUserDataC();
+  }, [post?.id]);
+
+  useEffect(() => {
     const getComments = async () => {
       if (!post?.id) {
         setLoading(false);
         return;
       }
       const data = await getAllCommentFromPost(post.id);
-      setComments(data.data);
+      setComments(data.data.data);
       setLoading(false);
     };
     getComments();
@@ -64,7 +76,6 @@ const PostInformationPopup = ({ post, onClose }) => {
       })
     );
 
-    console.log(result.data.text);
 
     const res = await createComment(realFormData);
     if (res.success) {
@@ -74,159 +85,78 @@ const PostInformationPopup = ({ post, onClose }) => {
     }
   };
 
-  // const handleCorrectToggle = async (commentId) => {
-  //   try {
-  //     if (
-  //       comment.Votes.filter((vote) => vote.userId === user.id && vote.type === "Correct").length === 0
+  const handleCorrectToggle = async (commentId) => {
+    try {
+      const updatedComments = comments.map((comment) => {
+        if (comment.id !== commentId) return comment;
 
-  //       // comments?.filter((commentItem) => commentItem.id === commentId)[0]?.Votes.filter((vote) => vote.userId === user.id).length === 0
-  //     ) {
-  //       await increaseCorrect(commentId);
-  //       console.log("Increment");
-  //     } else {
-  //       await decreaseCorrect(commentId);
-  //       console.log("Decrement")
-  //     }
-  //     location.reload();
+        const existingVote = comment.Votes.find(
+          (vote) => vote.userId === user.id && vote.type === "Correct"
+        );
 
-  //     // const isCurrentlyClicked = userVotes[commentId]?.correct || false;
+        if (!existingVote) {
+          // User hasn't voted "Correct" yet → Increase
+          increaseCorrect(commentId);
+          return {
+            ...comment,
+            correctCount: comment.correctCount + 1,
+            Votes: [...comment.Votes, { userId: user.id, type: "Correct" }],
+          };
+        } else {
+          // User already voted "Correct" → Decrease
+          decreaseCorrect(commentId);
+          return {
+            ...comment,
+            correctCount: Math.max(0, comment.correctCount - 1),
+            Votes: comment.Votes.filter(
+              (vote) => !(vote.userId === user.id && vote.type === "Correct")
+            ),
+          };
+        }
+      });
 
-  //     // setUserVotes((prev) => ({
-  //     //   ...prev,
-  //     //   [commentId]: {
-  //     //     ...prev[commentId],
-  //     //     correct: !isCurrentlyClicked,
-  //     //   },
-  //     // }));
+      setComments(updatedComments);
+    } catch (error) {
+      console.error("Error toggling correct:", error);
+    }
+  };
 
-  //     // setComments((prev) =>
-  //     //   prev.map((c) =>
-  //     //     c.id === commentId
-  //     //       ? {
-  //     //           ...c,
-  //     //           correctCount: isCurrentlyClicked
-  //     //             ? Math.max(0, c.correctCount - 1)
-  //     //             : c.correctCount + 1,
-  //     //         }
-  //     //       : c
-  //     //   )
-  //     // );
-  //   } catch (error) {
-  //     console.error("Error toggling correct:", error);
-  //   }
-  // };
+  const handleSimpleToggle = async (commentId) => {
+    try {
+      const updatedComments = comments.map((comment) => {
+        if (comment.id !== commentId) return comment;
 
-  // const handleSimpleToggle = async (commentId) => {
-  //   try {
-  //     if (
-  //       comments?.filter((commentItem) => commentItem.id === commentId)[0]?.Votes.filter((vote) => vote.userId === user.id).length === 0
-  //     ) {
-  //       await increaseSimple(commentId);
-  //       console.log("Increment");
-  //     } else {
-  //       await decreaseSimple(commentId);
-  //       console.log("Decrement")
-  //     }
-  //     location.reload();
-  //     // await new Promise((resolve) => setTimeout(resolve, 100));
+        const existingVote = comment.Votes.find(
+          (vote) => vote.userId === user.id && vote.type === "Simple"
+        );
 
-  //     // const isCurrentlyClicked = userVotes[commentId]?.simple || false;
+        if (!existingVote) {
+          // User hasn't voted "Simple" yet → Increase
+          increaseSimple(commentId);
+          return {
+            ...comment,
+            simpleCount: comment.simpleCount + 1,
+            Votes: [...comment.Votes, { userId: user.id, type: "Simple" }],
+          };
+        } else {
+          // User already voted "Simple" → Decrease
+          decreaseSimple(commentId);
+          return {
+            ...comment,
+            simpleCount: Math.max(0, comment.simpleCount - 1),
+            Votes: comment.Votes.filter(
+              (vote) => !(vote.userId === user.id && vote.type === "Simple")
+            ),
+          };
+        }
+      });
 
-  //     // setUserVotes((prev) => ({
-  //     //   ...prev,
-  //     //   [commentId]: {
-  //     //     ...prev[commentId],
-  //     //     simple: !isCurrentlyClicked,
-  //     //   },
-  //     // }));
+      setComments(updatedComments);
+    } catch (error) {
+      console.error("Error toggling simple:", error);
+    }
+  };
 
-  //     // setComments((prev) =>
-  //     //   prev.map((c) =>
-  //     //     c.id === commentId
-  //     //       ? {
-  //     //           ...c,
-  //     //           simpleCount: isCurrentlyClicked
-  //     //             ? Math.max(0, c.simpleCount - 1)
-  //     //             : c.simpleCount + 1,
-  //     //         }
-  //     //       : c
-  //     //   )
-  //     // );
-  //   } catch (error) {
-  //     console.error("Error toggling simple:", error);
-  //   }
-  // };
-const handleCorrectToggle = async (commentId) => {
-  try {
-    const updatedComments = comments.map((comment) => {
-      if (comment.id !== commentId) return comment;
-
-      const existingVote = comment.Votes.find(
-        (vote) => vote.userId === user.id && vote.type === "Correct"
-      );
-
-      if (!existingVote) {
-        // User hasn't voted "Correct" yet → Increase
-        increaseCorrect(commentId);
-        return {
-          ...comment,
-          correctCount: comment.correctCount + 1,
-          Votes: [...comment.Votes, { userId: user.id, type: "Correct" }],
-        };
-      } else {
-        // User already voted "Correct" → Decrease
-        decreaseCorrect(commentId);
-        return {
-          ...comment,
-          correctCount: Math.max(0, comment.correctCount - 1),
-          Votes: comment.Votes.filter(
-            (vote) => !(vote.userId === user.id && vote.type === "Correct")
-          ),
-        };
-      }
-    });
-
-    setComments(updatedComments);
-  } catch (error) {
-    console.error("Error toggling correct:", error);
-  }
-};
-
-const handleSimpleToggle = async (commentId) => {
-  try {
-    const updatedComments = comments.map((comment) => {
-      if (comment.id !== commentId) return comment;
-
-      const existingVote = comment.Votes.find(
-        (vote) => vote.userId === user.id && vote.type === "Simple"
-      );
-
-      if (!existingVote) {
-        // User hasn't voted "Simple" yet → Increase
-        increaseSimple(commentId);
-        return {
-          ...comment,
-          simpleCount: comment.simpleCount + 1,
-          Votes: [...comment.Votes, { userId: user.id, type: "Simple" }],
-        };
-      } else {
-        // User already voted "Simple" → Decrease
-        decreaseSimple(commentId);
-        return {
-          ...comment,
-          simpleCount: Math.max(0, comment.simpleCount - 1),
-          Votes: comment.Votes.filter(
-            (vote) => !(vote.userId === user.id && vote.type === "Simple")
-          ),
-        };
-      }
-    });
-
-    setComments(updatedComments);
-  } catch (error) {
-    console.error("Error toggling simple:", error);
-  }
-};
 
   return (
     <div className="fixed inset-0 backdrop-blur-xs bg-opacity-40 z-50 flex items-center justify-center overflow-auto">
@@ -286,87 +216,54 @@ const handleSimpleToggle = async (commentId) => {
           <div className="text-center py-4">Loading comments...</div>
         ) : (
           <>
-            {comments.length === 0 ? (
-              <div className="text-center py-4 text-gray-500">
-                No comments yet
-              </div>
-            ) : (
-              comments.map((commentItem) => (
+            {comments.map((commentItem) => {
+              const hasVotedCorrect = commentItem?.Votes?.some(
+                (vote) => vote.userId === user.id && vote.type === "Correct"
+              );
+
+              const hasVotedSimple = commentItem?.Votes?.some(
+                (vote) => vote.userId === user.id && vote.type === "Simple"
+              );
+              return (
                 <div
                   key={commentItem.id}
                   className="mb-6 bg-[#fdf8f1] p-4 rounded"
                 >
                   <p className="font-semibold mb-1">
-                    User {commentItem.userId}
+                    {commentItem?.User?.fName} {commentItem?.User?.sName}
+                    {/* User {commentItem.userId} */}
                   </p>
+
                   <p className="text-sm text-gray-800 mb-3">
                     {commentItem.text}
                   </p>
+
                   <div className="flex gap-2 items-center">
-                    {commentItem?.Votes?.filter(
-                      (vote) => user.id === vote.userId
-                    ).length !== 0 ? (
-                      <button
-                        onClick={() =>
-                          handleCorrectToggle(
-                            commentItem.id,
-                            commentItem.correctCount,
-                            false
-                          )
-                        }
-                        className="px-3 py-1 text-sm font-semibold rounded-md border bg-green-500 text-white border-black hover:bg-green-700 transition-all"
-                      >
-                        Correct ({commentItem.correctCount || 0})
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          handleCorrectToggle(
-                            commentItem.id,
-                            commentItem.correctCount,
-                            false
-                          )
-                        }
-                        className="px-3 py-1 text-sm font-semibold rounded-md border bg-[#FFF1DC] text-black border-black hover:bg-green-500 hover:text-white transition-all"
-                      >
-                        Correct ({commentItem.correctCount || 0})
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleCorrectToggle(commentItem.id)}
+                      className={`px-3 py-1 text-sm font-semibold rounded-md border border-black transition-all ${
+                        hasVotedCorrect
+                          ? "bg-green-500 text-white hover:bg-green-700"
+                          : "bg-[#FFF1DC] text-black hover:bg-green-500 hover:text-white"
+                      }`}
+                    >
+                      Correct ({commentItem.correctCount || 0})
+                    </button>
 
-
-                    {commentItem?.Votes?.filter(
-                      (vote) => user.id === vote.userId
-                    ).length !== 0 ? (
-                      <button
-                        onClick={() =>
-                          handleSimpleToggle(
-                            commentItem.id,
-                            commentItem.simpleCount,
-                            false
-                          )
-                        }
-                        className="px-3 py-1 text-sm font-semibold rounded-md border bg-orange-500 text-white border-black hover:bg-orange-700 transition-all"
-                      >
-                        Simple ({commentItem.simpleCount || 0})
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          handleSimpleToggle(
-                            commentItem.id,
-                            commentItem.simpleCount,
-                            false
-                          )
-                        }
-                        className="px-3 py-1 text-sm font-semibold rounded-md border bg-[#FFF1DC] text-black border-black hover:bg-orange-500 hover:text-white transition-all"
-                      >
-                        Simple ({commentItem.simpleCount || 0})
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleSimpleToggle(commentItem.id)}
+                      className={`px-3 py-1 text-sm font-semibold rounded-md border border-black transition-all ${
+                        hasVotedSimple
+                          ? "bg-orange-500 text-white hover:bg-orange-700"
+                          : "bg-[#FFF1DC] text-black hover:bg-orange-500 hover:text-white"
+                      }`}
+                    >
+                      Simple ({commentItem.simpleCount || 0})
+                    </button>
                   </div>
                 </div>
-              ))
-            )}
+              );
+            })}
           </>
         )}
       </div>

@@ -67,7 +67,7 @@ function Profile() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
+    <div className="absolute inset-0 bg-[#F5F5F5] overflow-auto">
       <Navbar />
       <div className="max-w-6xl mx-auto px-4 py-10">
         {showSuccess && (

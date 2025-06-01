@@ -86,21 +86,6 @@ export const getUser = async (c: Context) => {
   }
 };
 
-export const getAllUser = async (c: Context) => {
-  try {
-    const allUser = await userModel.getAllUser();
-    return c.json(allUser, 200);
-  } catch (e) {
-    return c.json(
-      {
-        success: false,
-        data: null,
-        msg: `${e}`,
-      },
-      500
-    );
-  }
-};
 
 export const loginUser = async (c: Context) => {
   try {

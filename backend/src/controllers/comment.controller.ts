@@ -206,3 +206,18 @@ export const decreaseSimple = async (c: Context) => {
     );
   }
 };
+
+export const getAllCommentFromPost = async (c: Context) => {
+  try {
+    const postId = Number(c.req.param("postId"));
+
+    if (!postId) {
+      return c.json({ success: false, msg: "Missing postId" }, 400);
+    }
+    const comments = await commentModel.getCommentUser(postId)
+    return c.json({ success: true, data: comments });
+  } catch (e) {
+    console.error(e);
+    return c.json({ success: false, msg: "Server error" }, 500);
+  }
+};

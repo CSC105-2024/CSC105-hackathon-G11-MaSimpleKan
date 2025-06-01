@@ -28,20 +28,25 @@ const getUser = async (id: number) => {
   return user;
 };
 
-
-const getAllUser = async () => {
-  const user = await db.user.findMany({});
-  return user;
+const getUserComment = async (postId: number) => {
+  const comments = await db.comment.findMany({
+    where: { postId },
+    include: {
+      Votes: true,
+      User: true,
+    },
+  });
+  return comments;
 };
 
 const getLoginUser = async (email: string, password: string) => {
-    const user = await db.user.findUnique({
-        where: {
-            email,
-            password
-        }
-    });
-    return user;
+  const user = await db.user.findUnique({
+    where: {
+      email,
+      password,
+    },
+  });
+  return user;
 };
 
 const getUserLoggedIn = async (id: number) => {
@@ -53,4 +58,4 @@ const getUserLoggedIn = async (id: number) => {
   return user;
 };
 
-export {createUser,getUser,getAllUser,getLoginUser, getUserLoggedIn}
+export { createUser, getUser, getUserComment, getLoginUser, getUserLoggedIn };
