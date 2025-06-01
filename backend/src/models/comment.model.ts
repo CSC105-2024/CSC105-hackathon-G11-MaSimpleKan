@@ -22,19 +22,26 @@ export const getComment = async (id: number) => {
       id,
     },
     include: {
-        Votes: true
-    }
+      Votes: true,
+    },
   });
   return commentForm;
 };
 
 export const getAllCommentFromPost = async (postId: number) => {
-  const commentForm = db.comment.findMany({
+  const commentForm = await db.comment.findMany({
     where: {
       postId,
     },
     include: {
       Votes: true,
+      User: {
+        select: {
+          id: true,
+          fName: true,
+          sName: true,
+        },
+      },
     },
     orderBy: [
       {
@@ -45,13 +52,11 @@ export const getAllCommentFromPost = async (postId: number) => {
       },
     ],
   });
+
   return commentForm;
 };
 
-export const increaseCorrectCount = async (
-  id: number,
-  userId: number
-) => {
+export const increaseCorrectCount = async (id: number, userId: number) => {
   await Promise.all([
     db.comment.update({
       where: {
@@ -91,18 +96,15 @@ export const decreaseCorrectCount = async (id: number, userId: number) => {
         userId_commentId_voteType: {
           userId,
           commentId: id,
-          voteType: "Correct"
-        }
+          voteType: "Correct",
+        },
       },
     }),
   ]);
   return null;
 };
 
-export const increaseSimpleCount = async (
-  id: number,
-  userId: number
-) => {
+export const increaseSimpleCount = async (id: number, userId: number) => {
   await Promise.all([
     db.comment.update({
       where: {
@@ -142,10 +144,27 @@ export const decreaseSimpleCount = async (id: number, userId: number) => {
         userId_commentId_voteType: {
           userId,
           commentId: id,
-          voteType: "Simple"
-        }
+          voteType: "Simple",
+        },
       },
     }),
   ]);
   return null;
+};
+
+export const getCommentUser = async (postId: number) => {
+  const comments = await db.comment.findMany({
+    where: { postId },
+    include: {
+      Votes: true,
+      User: {
+        select: {
+          id: true,
+          fName: true,
+          sName: true,
+        },
+      },
+    },
+  });
+  return comments;
 };

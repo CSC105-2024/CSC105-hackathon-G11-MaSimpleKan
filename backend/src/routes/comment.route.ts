@@ -10,6 +10,7 @@ commentRouter.patch("/inCorrect", authMiddleware, commentController.increaseCorr
 commentRouter.delete("/deCorrect", authMiddleware, commentController.decreaseCorrect);
 commentRouter.patch("/inSimple", authMiddleware,commentController.increaseSimple);
 commentRouter.delete("/deSimple",  authMiddleware,commentController.decreaseSimple);
+commentRouter.get("/post/:postId", commentController.getAllCommentFromPost);
 
 // integration
 commentRouter.post("/create", authMiddleware, commentController.createComment);

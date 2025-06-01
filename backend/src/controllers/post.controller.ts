@@ -192,27 +192,29 @@ export const getAllPost = async (c: Context) => {
   }
 };
 
+// comment.controller.ts
 export const getAllCommentFromPost = async (c: Context) => {
   try {
     const postId = c.req.query("postId");
-    if (!postId)
+    if (!postId) {
       return c.json({
         success: false,
         data: null,
-        msg: "Missing required",
-      });
-    const allComments = await commentModel.getAllCommentFromPost(
-      parseInt(postId)
-    );
-    return c.json(allComments, 200);
+        msg: "Missing required postId",
+      }, 400);
+    }
+
+    const allComments = await commentModel.getAllCommentFromPost(parseInt(postId));
+    return c.json({
+      success: true,
+      data: allComments,
+    });
   } catch (e) {
-    return c.json(
-      {
-        success: false,
-        data: null,
-        msg: `${e}`,
-      },
-      500
-    );
+    return c.json({
+      success: false,
+      data: null,
+      msg: `${e}`,
+    }, 500);
   }
 };
+
